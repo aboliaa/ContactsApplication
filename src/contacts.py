@@ -19,9 +19,12 @@ class ContactManager(object):
 		"""
 		self.contacts.insert(contact)
 
-	def searchContact(self, contact):
+	def searchContact(self, contact, pretty=True):
 		""" Search for a contact in ternary search tree
 		"""
 		result = self.contacts.prefixSearch(contact)
-		return self.output.pretty(result)
+		if pretty:
+			return self.output.pretty(result)
+		else:
+			return result
 

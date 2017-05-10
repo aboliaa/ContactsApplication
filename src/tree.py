@@ -162,20 +162,20 @@ class TernarySearchTree(object):
 		logger.debug(node)
 
 		if self.getVal(ch) < self.getVal(node.val):
-			return self._prefixSearch(string, word, node.left)
+			return self._prefixSearch(string, word, node.left, results)
 		elif self.getVal(ch) > self.getVal(node.val):
-			return self._prefixSearch(string, word, node.right)
+			return self._prefixSearch(string, word, node.right, results)
 		else:
 			if len(string) == 1:
 				if node.isEndOfWord:
 					logger.debug("End of word " + string)
 					results.append(word+node.val)
 				if node.equal:
-					DFSResults = self._DFS(node.equal, word+node.val+node.equal.val)
+					DFSResults = self._DFS(node.equal, word+node.val+node.equal.val, results)
 					results.extend(DFSResults)
 				results = list(set(results))
 			else:
-				return self._prefixSearch(string[1:], word+node.val, node.equal)
+				return self._prefixSearch(string[1:], word+node.val, node.equal, results)
 		return results
 
 	def prefixSearch(self, string):
@@ -203,7 +203,9 @@ if __name__ == "__main__":
 	print "\nSimple search:", t.search("bug")
 	print "\nPrefix search:"
 	print t.prefixSearch("CA")
+	print "================"
+	print t.prefixSearch("up")
 	
 	print "\nDFS:"
-	t.DFS()
+	# t.DFS()
 
