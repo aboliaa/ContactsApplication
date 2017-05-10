@@ -1,9 +1,19 @@
 from const import DEBUG
 
+"""
+Implementation of Ternary Search Tree.
+
+http://www.geeksforgeeks.org/ternary-search-tree/
+https://www.cs.usfca.edu/~galles/visualization/TST.html
+http://hacktalks.blogspot.in/2012/03/implementing-auto-complete-with-ternary.html
+
+"""
+
+
 class Node(object):
-	def __init__(self, val, isEndOfString=False):
+	def __init__(self, val, isEndOfWord=False):
 		self.val = val
-		self.isEndOfString = isEndOfString
+		self.isEndOfWord = isEndOfWord
 		self.left = None
 		self.right = None
 		self.equal = None
@@ -13,7 +23,7 @@ class Node(object):
 		equalval = self.equal.val if self.equal else None
 		rightval = self.right.val if self.right else None
 		msg = "\nChar = %s, End-of-word = %s \nLeft = %s, Equal = %s, Right = %s"
-		args = (self.val, self.isEndOfString, leftval, equalval, rightval)
+		args = (self.val, self.isEndOfWord, leftval, equalval, rightval)
 		return msg %args
 
 class TernarySearchTree(object):
@@ -40,7 +50,7 @@ class TernarySearchTree(object):
 			node.right = self._insert(word, node.right)
 		else:
 			if len(word) == 1:
-				node.isEndOfString = True
+				node.isEndOfWord = True
 				if DEBUG:
 					print "End of string", ch
 			else:
@@ -51,8 +61,9 @@ class TernarySearchTree(object):
 		return self._insert(word, self.root)
 
 	def _DFS(self, node, word):
-		if node.isEndOfString:
-			print "Word found", word
+		if node.isEndOfWord:
+			if DEBUG:
+				print "Word found", word
 
 		if not node.left and not node.equal and not node.right:
 			return
@@ -70,9 +81,11 @@ class TernarySearchTree(object):
 		word = self.root.val
 		return self._DFS(self.root, word)
 
-
-	def _search(self, word, node=None):
+	def _search(self, word, node):
 		if not node:
+			return False
+
+		if not word:
 			return False
 
 		ch = word[0]
@@ -86,15 +99,48 @@ class TernarySearchTree(object):
 			return self._search(word, node.right)
 		else:
 			if len(word) == 1:
-				return node.isEndOfString
+				return node.isEndOfWord
 			else:
 				return self._search(word[1:], node.equal)
 
 	def search(self, word):
+		if not self.root:
+			return False
 		return self._search(word, self.root)
 
+	def _prefixSearch(self, string, word, node):
+		if not string:
+			return []
+		if not node:
+			return []
+
+		ch = string[0]
+		if DEBUG:
+			print "Char", ch, string, word 
+			print node
+
+		if ch < node.val:
+			return self._prefixSearch(string, word, node.left)
+		elif ch > node.val:
+			return self._prefixSearch(string, word, node.right)
+		else:
+			if len(string) == 1:
+				if node.isEndOfWord:
+					if DEBUG:
+						print "End of word", string
+				if node.equal:
+					self._DFS(node.equal, word+node.val+node.equal.val)
+			else:
+				return self._prefixSearch(string[1:], word+ch, node.equal)
+
 	def prefixSearch(self, string):
-		pass
+		if not self.root:
+			return []
+
+		if not string:
+			return []
+	
+		return self._prefixSearch(string, "", self.root)
 
 if __name__ == "__main__":
 	t = TernarySearchTree()
@@ -106,5 +152,9 @@ if __name__ == "__main__":
 	t.insert("up")
 	t.insert("utter")
 
-	# print t.search("ca")
+	print "\nSimple search:", t.search("bug")
+	print "\nPrefix search:"
+	t.prefixSearch("ca")
+	
+	print "\nDFS:"
 	t.DFS()
