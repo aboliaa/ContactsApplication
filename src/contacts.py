@@ -15,9 +15,13 @@ class ContactManager(object):
 
 	@validateInput
 	def addContact(self, contact):
+		""" Add a contact to ternary search tree
+		"""
 		self.contacts.insert(contact)
 
 	def searchContact(self, contact):
+		""" Search for a contact in ternary search tree
+		"""
 		result = self.contacts.prefixSearch(contact)
-		return self.output.format(result)
+		return self.output.pretty(result)
 

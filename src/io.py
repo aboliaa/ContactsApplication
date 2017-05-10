@@ -4,10 +4,10 @@ from const import MAX_CONTACT_LEN
 __all__ = ["InputProcessor", "OutputProcessor"]
 
 class InputProcessor(object):
-	def __init__(self):
-		pass
-
 	def validateContact(self, contact):
+		""" Validate and normalize a contact.
+		"""
+
 		# Remove extra leading and trailing whitespaces
 		contact = contact.strip()
 
@@ -22,22 +22,22 @@ class InputProcessor(object):
 			# Contact contains only firstName
 			pass
 		elif len(subparts) == 2:
-			# Contact contains firstName LastName
+			# Contact contains firstName LastName, remove extra whitespace
 			contact = subparts[0].strip() + " " + subparts[1].strip()
 		else:
 			# More than one space separators. Invalid contact
 			raise Exception("Invalid contact: Too many subparts %s" %contact)
 
+		# As per the specs, contact should not be greater than MAX_CONTACT_LEN
 		if len(contact) > MAX_CONTACT_LEN:
 			raise Exception("Invalid contact: Max length exceeded %s" %contact)
 
 		return contact
 
 class OutputProcessor(object):
-	def __init__(self):
-		pass
-
-	def format(self, output):
+	def pretty(self, output):
+		""" Convert search results into pretty format.
+		"""
 		if not output:
 			return ""
 		if not isinstance(output, list):

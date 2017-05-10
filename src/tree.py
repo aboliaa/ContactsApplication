@@ -2,10 +2,22 @@
 """
 Implementation of Ternary Search Tree.
 
+[Wikipedia]
+A ternary search tree is a type of trie where nodes are arranged in a manner 
+similar to a binary search tree, but with up to three children rather than the 
+binary tree's limit of two. Like other prefix trees, a ternary search tree can 
+be used as an associative map structure with the ability for incremental string search.
+
+Ternary search trees are more space-efficient than tries, because each node can
+have atmost 3 children (there can be upto 26 children in tries).
+
+Tries can be more time-efficeint than ternary search trees, there can space/time
+tradeoff.
+
+References:
 http://www.geeksforgeeks.org/ternary-search-tree/
 https://www.cs.usfca.edu/~galles/visualization/TST.html
 http://hacktalks.blogspot.in/2012/03/implementing-auto-complete-with-ternary.html
-
 """
 
 from log import logger
@@ -21,6 +33,8 @@ class Node(object):
 		self.equal = None
 
 	def __repr__(self):
+		""" Print a node in readable format.
+		"""
 		leftval = self.left.val if self.left else None
 		equalval = self.equal.val if self.equal else None
 		rightval = self.right.val if self.right else None
@@ -33,27 +47,27 @@ class TernarySearchTree(object):
 		self.root = None
 		self.caseSensitive = caseSensitive
 
-	def nodeVal(self, node):
+	def _nodeVal(self, node):
+		""" Return the value of node.
+		"""
 		if not node:
 			return None
 		if node.val is None:
 			return None
 		return node.val
 
-	def compareVal(self, v1, v2):
-		if type(v1) == Node:
-			v1 = self.nodeVal(v1)
-		if type(v2) == Node:
-			v2 = self.nodeVal(v2)
-		if v1 is None:
-			v1 = ""
-		if v2 is None:
-			v2 = ""
+	def getVal(self, v):
+		""" Return the value of node/char depending on case-sensitivity.
+		"""
+		if type(v) == Node:
+			v = self._nodeVal(v)
+		if v is None:
+			v = ""
 
 		if self.caseSensitive:
-			return v1 == v2
+			return v
 		else:
-			return v1.lower() == v2.lower()
+			return v.lower()
 
 	def _insert(self, word, node=None):
 		if not word:
@@ -80,6 +94,8 @@ class TernarySearchTree(object):
 		return node
 	
 	def insert(self, word):
+		""" Insert a word in tree.
+		"""
 		return self._insert(word, self.root)
 
 	def _DFS(self, node, word, results=[]):
@@ -100,6 +116,8 @@ class TernarySearchTree(object):
 		return results
 
 	def DFS(self):
+		""" Preorder depth first traversal of a tree.
+		"""
 		if not self.root:
 			return
 		word = self.root.val
@@ -116,9 +134,9 @@ class TernarySearchTree(object):
 		logger.debug("Char %s %s" %(ch, word))
 		logger.debug(node)
 
-		if ch < node.val:
+		if self.getVal(ch) < self.getVal(node.val):
 			return self._search(word, node.left)
-		elif ch > node.val:
+		elif self.getVal(ch) > self.getVal(node.val):
 			return self._search(word, node.right)
 		else:
 			if len(word) == 1:
@@ -127,6 +145,8 @@ class TernarySearchTree(object):
 				return self._search(word[1:], node.equal)
 
 	def search(self, word):
+		""" Search for exact word.
+		"""
 		if not self.root:
 			return False
 		return self._search(word, self.root)
@@ -141,30 +161,34 @@ class TernarySearchTree(object):
 		logger.debug("Char %s %s %s" %(ch, string, word))
 		logger.debug(node)
 
-		if ch < node.val:
+		if self.getVal(ch) < self.getVal(node.val):
 			return self._prefixSearch(string, word, node.left)
-		elif ch > node.val:
+		elif self.getVal(ch) > self.getVal(node.val):
 			return self._prefixSearch(string, word, node.right)
 		else:
 			if len(string) == 1:
 				if node.isEndOfWord:
 					logger.debug("End of word " + string)
-					results.append(word+ch)
+					results.append(word+node.val)
 				if node.equal:
 					DFSResults = self._DFS(node.equal, word+node.val+node.equal.val)
 					results.extend(DFSResults)
+				results = list(set(results))
 			else:
-				return self._prefixSearch(string[1:], word+ch, node.equal)
+				return self._prefixSearch(string[1:], word+node.val, node.equal)
 		return results
 
 	def prefixSearch(self, string):
+		""" Prefix search
+		"""
 		if not self.root:
 			return []
 
 		if not string:
 			return []
-	
-		return self._prefixSearch(string, "", self.root)
+
+		results = []
+		return self._prefixSearch(string, "", self.root, results)
 
 if __name__ == "__main__":
 	t = TernarySearchTree()
@@ -178,7 +202,8 @@ if __name__ == "__main__":
 
 	print "\nSimple search:", t.search("bug")
 	print "\nPrefix search:"
-	print t.prefixSearch("cat")
+	print t.prefixSearch("CA")
 	
 	print "\nDFS:"
 	t.DFS()
+
