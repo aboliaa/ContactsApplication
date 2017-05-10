@@ -1,0 +1,1 @@
+MAX_CONTACT_LEN = 50

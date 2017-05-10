@@ -10,6 +10,8 @@ http://hacktalks.blogspot.in/2012/03/implementing-auto-complete-with-ternary.htm
 
 from log import logger
 
+__all__ = ["TernarySearchTree"]
+
 class Node(object):
 	def __init__(self, val, isEndOfWord=False):
 		self.val = val
@@ -27,8 +29,31 @@ class Node(object):
 		return msg %args
 
 class TernarySearchTree(object):
-	def __init__(self):
+	def __init__(self, caseSensitive=False):
 		self.root = None
+		self.caseSensitive = caseSensitive
+
+	def nodeVal(self, node):
+		if not node:
+			return None
+		if node.val is None:
+			return None
+		return node.val
+
+	def compareVal(self, v1, v2):
+		if type(v1) == Node:
+			v1 = self.nodeVal(v1)
+		if type(v2) == Node:
+			v2 = self.nodeVal(v2)
+		if v1 is None:
+			v1 = ""
+		if v2 is None:
+			v2 = ""
+
+		if self.caseSensitive:
+			return v1 == v2
+		else:
+			return v1.lower() == v2.lower()
 
 	def _insert(self, word, node=None):
 		if not word:
@@ -57,19 +82,22 @@ class TernarySearchTree(object):
 	def insert(self, word):
 		return self._insert(word, self.root)
 
-	def _DFS(self, node, word):
+	def _DFS(self, node, word, results=[]):
 		if node.isEndOfWord:
 			logger.debug("Word found " + word)
+			results.append(word)
 
 		if not node.left and not node.equal and not node.right:
-			return
+			return results
 
 		if node.left:
-			self._DFS(node.left, word[:-1]+node.left.val)
+			self._DFS(node.left, word[:-1]+node.left.val, results)
 		if node.equal:
-			self._DFS(node.equal, word+node.equal.val)
+			self._DFS(node.equal, word+node.equal.val, results)
 		if node.right:
-			self._DFS(node.right, word[:-1]+node.right.val)
+			self._DFS(node.right, word[:-1]+node.right.val, results)
+
+		return results
 
 	def DFS(self):
 		if not self.root:
@@ -103,11 +131,11 @@ class TernarySearchTree(object):
 			return False
 		return self._search(word, self.root)
 
-	def _prefixSearch(self, string, word, node):
+	def _prefixSearch(self, string, word, node, results=[]):
 		if not string:
-			return []
+			return results
 		if not node:
-			return []
+			return results
 
 		ch = string[0]
 		logger.debug("Char %s %s %s" %(ch, string, word))
@@ -120,11 +148,14 @@ class TernarySearchTree(object):
 		else:
 			if len(string) == 1:
 				if node.isEndOfWord:
-					logger.debug("End of word" + string)
+					logger.debug("End of word " + string)
+					results.append(word+ch)
 				if node.equal:
-					self._DFS(node.equal, word+node.val+node.equal.val)
+					DFSResults = self._DFS(node.equal, word+node.val+node.equal.val)
+					results.extend(DFSResults)
 			else:
 				return self._prefixSearch(string[1:], word+ch, node.equal)
+		return results
 
 	def prefixSearch(self, string):
 		if not self.root:
@@ -147,7 +178,7 @@ if __name__ == "__main__":
 
 	print "\nSimple search:", t.search("bug")
 	print "\nPrefix search:"
-	t.prefixSearch("ca")
+	print t.prefixSearch("cat")
 	
 	print "\nDFS:"
 	t.DFS()
