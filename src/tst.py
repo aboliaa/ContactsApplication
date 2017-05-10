@@ -1,4 +1,3 @@
-from const import DEBUG
 
 """
 Implementation of Ternary Search Tree.
@@ -9,6 +8,7 @@ http://hacktalks.blogspot.in/2012/03/implementing-auto-complete-with-ternary.htm
 
 """
 
+from log import logger
 
 class Node(object):
 	def __init__(self, val, isEndOfWord=False):
@@ -40,9 +40,7 @@ class TernarySearchTree(object):
 		if not self.root:
 			self.root = node
 
-		if DEBUG:
-			print "Adding char", ch
-
+		logger.debug("Adding char " + ch)
 
 		if ch < node.val:
 			node.left = self._insert(word, node.left)
@@ -51,8 +49,7 @@ class TernarySearchTree(object):
 		else:
 			if len(word) == 1:
 				node.isEndOfWord = True
-				if DEBUG:
-					print "End of string", ch
+				logger.debug("End of string " + ch)
 			else:
 				node.equal = self._insert(word[1:], node.equal)
 		return node
@@ -62,8 +59,7 @@ class TernarySearchTree(object):
 
 	def _DFS(self, node, word):
 		if node.isEndOfWord:
-			if DEBUG:
-				print "Word found", word
+			logger.debug("Word found " + word)
 
 		if not node.left and not node.equal and not node.right:
 			return
@@ -89,9 +85,8 @@ class TernarySearchTree(object):
 			return False
 
 		ch = word[0]
-		if DEBUG:
-			print "Char", ch, word 
-			print node
+		logger.debug("Char %s %s" %(ch, word))
+		logger.debug(node)
 
 		if ch < node.val:
 			return self._search(word, node.left)
@@ -115,9 +110,8 @@ class TernarySearchTree(object):
 			return []
 
 		ch = string[0]
-		if DEBUG:
-			print "Char", ch, string, word 
-			print node
+		logger.debug("Char %s %s %s" %(ch, string, word))
+		logger.debug(node)
 
 		if ch < node.val:
 			return self._prefixSearch(string, word, node.left)
@@ -126,8 +120,7 @@ class TernarySearchTree(object):
 		else:
 			if len(string) == 1:
 				if node.isEndOfWord:
-					if DEBUG:
-						print "End of word", string
+					logger.debug("End of word" + string)
 				if node.equal:
 					self._DFS(node.equal, word+node.val+node.equal.val)
 			else:
